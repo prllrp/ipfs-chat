@@ -36,6 +36,7 @@ export default {
         let message = JSON.parse(new TextDecoder().decode(data.data));
         this.messages.push(message);
         console.log(this.messages);
+        this.title = channel;
       }
       );
       this.channelJoined = true;
@@ -66,9 +67,11 @@ export default {
         }
       });
       console.log(node);
+      this.id = await node.id().id
+      this.node = node;
       const status = node.isOnline() ? 'online' : 'offline'
       const id = await node.id()
-
+      this.id = id.id
       console.log(`Node status: ${status}, id: ${id.id}`)
       this.me = id.id
       console.log(this.me)
@@ -77,21 +80,24 @@ export default {
       await node.pubsub.subscribe('announce-circuit', this.processAnnounce)
       console.log('subscribed to announce-circuit')
 
-      node.pubsub.publish('announce-circuit', new TextEncoder().encode('peer-alive'))
+
+      for(let i = 0; i < 10; i++){
+        await node.pubsub.publish('announce-circuit', new TextEncoder().encode('peer-alive'))
+      }
+      
 
       setInterval(function () {
-        if(this.peerCount < 5){
+        if(this.peerCount < 100){
           node.pubsub.publish('announce-circuit', new TextEncoder().encode('peer-alive'))
         }
       }, 1000);
 
       setInterval(function () {
         node.pubsub.publish('announce-circuit', new TextEncoder().encode('keep-alive'))
-      }, 5000);
+      }, 2000);
 
       
-      this.id = await node.id().id
-      this.node = node;
+      
       return node;
     },
     async publishMessages(message) {
@@ -103,12 +109,12 @@ export default {
 			
 			// process the recieved address
 			const addr = new TextDecoder().decode(announce.data);
-			console.log('Announce processed ' + addr +  'from ' + announce.from.toString());
+			console.log('Announce reeceived ' + addr +  'from ' + announce.from.toString());
       
       
       if(announce.from == this.me.string){
         console.log('Ignoring self announcement')
-        return;
+        //return;
       }
 			
 			if (addr == "peer-alive") {
@@ -127,6 +133,7 @@ export default {
 			
 			if (addr == "keep-alive") {
 				console.log(addr);
+        this.lastAlive = new Date().getTime();
 				return;
 			} 
 			
@@ -150,18 +157,18 @@ export default {
 			}
 			
 		},
-    checkAlive() {
+    async checkAlive() {
 			let now = new Date().getTime();
 			if (now-this.lastAlive >= 35000) {
         //TODO restart the  node if it is not connected to the network
 				if (now-this.lastPeer >= 35000) {
 					console.log('No peers found, restarting node');
-          this.node.stop();
-          this.node = this.createNode();
+          await this.node.stop();
+          this.node = await this.createNode();
 				} else {
 					console.log('No peers found, restarting node');
-          this.node.stop();
-          this.node = this.createNode();
+          await this.node.stop();
+          this.node = await this.createNode();
 				}
 				// sometimes we appear to be connected to the bootstrap nodes, but we're not, so let's try to reconnect
 			} else {
@@ -174,7 +181,7 @@ export default {
     const node = await this.createNode();
     console.log(node);
     this.setChannel('global');
-    setInterval(this.checkAlive, 10000);
+    setInterval(this.checkAlive, 60000);
   },
   mounted() {
     }
