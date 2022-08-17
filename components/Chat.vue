@@ -10,12 +10,13 @@
         <div class="chat-body">
             <div class="chat-body-messages">
                 <div v-for="message in messages" v-bind:key="message.messageId"  class="chat-body-message">
+                 <div class="chat-body-id">
+                        {{ message.from }}
+                    </div>
                     <div class="chat-body-message-text">
                         {{ message.text }}
                     </div>
-                    <div class="chat-body-id">
-                        {{ message.from }}
-                    </div>
+                   
                     <div class="chat-body-message-time">
                         {{ message.time }}
                     </div>
@@ -65,6 +66,7 @@ export default {
             type: Boolean,
             default: false
         }
+
     },
     created(){
         

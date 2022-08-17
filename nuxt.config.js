@@ -9,6 +9,9 @@ export default {
   head: {
     title: 'ipfs-chat',
     script:[{hid: 'Ipfs', src: 'https://cdn.jsdelivr.net/npm/ipfs/dist/index.min.js', defer: true}],
+  //   {hid: 'crypto', src: 'https://cdn.jsdelivr.net/npm/libp2p-crypto@0.21.2/dist/index.min.js',  defer: true},
+  //   {hid: 'dag-cbor', src: 'https://cdn.jsdelivr.net/npm/@ipld/dag-cbor@7.0.2/index.js', defer: true },
+  // ],
     htmlAttrs: {
       lang: 'en'
     },
@@ -28,8 +31,8 @@ export default {
   ],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [
-  ],
+  plugins: [],
+ 
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -44,5 +47,7 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
-  }
+    transpile:[],
+  },
 }
+
