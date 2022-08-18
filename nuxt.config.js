@@ -8,10 +8,11 @@ export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     title: 'ipfs-chat',
-    script:[{hid: 'Ipfs', src: 'https://cdn.jsdelivr.net/npm/ipfs/dist/index.min.js', defer: true}],
-  //   {hid: 'crypto', src: 'https://cdn.jsdelivr.net/npm/libp2p-crypto@0.21.2/dist/index.min.js',  defer: true},
-  //   {hid: 'dag-cbor', src: 'https://cdn.jsdelivr.net/npm/@ipld/dag-cbor@7.0.2/index.js', defer: true },
-  // ],
+    script:[
+    {hid: 'Ipfs', src: 'https://cdn.jsdelivr.net/npm/ipfs/dist/index.min.js', defer: true},
+    {hid: 'Libcrypto', src: 'https://cdn.jsdelivr.net/npm/libp2p-crypto@0.21.2/dist/index.min.js', defer: true},
+    {hid: 'multiformats', src: 'https://cdn.jsdelivr.net/npm/multiformats@9.5.2/esm/src/index.js', defer: true, type: 'module'},
+  ],
     htmlAttrs: {
       lang: 'en'
     },
