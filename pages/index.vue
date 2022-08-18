@@ -12,6 +12,9 @@
 <script>
 import Chat from "~/components/Chat.vue";
 import Login from "../components/Login.vue";
+import { CID } from 'multiformats/cid';
+import * as json from 'multiformats/codecs/json'
+import { sha256 } from 'multiformats/hashes/sha2'
 
 export default {
   name: "IndexPage",
@@ -40,19 +43,12 @@ export default {
     };
   },
   methods: {
-    async dagPut(object){
-      //put a node on the ipfs dag
-      const obj = encode(object)
-      const cid = await this.node.dag.put(obj, { format: "dag-json", hashAlg: "sha2-256" })
-      return cid
-    },
-    async loginFunction(){
-      const obj =  {
-        name: 'ipfs-chat',
-        createdBy: 'Patrick Lane',
-        createdAt: new Date()
-      }
-
+    async signUpFunction(data){
+      this.username = data.username;
+      
+  },
+    async loginFunction(data){
+          
     },
     async setChannel(channel) {
       this.channel = channel;
@@ -102,12 +98,10 @@ export default {
         },
       });
       console.log(node);
-      this.id = await node.id().id;
+      this.id = await node.id();
       this.node = node;
       const status = node.isOnline() ? "online" : "offline";
-      const id = await node.id();
-      this.id = id.id;
-      console.log(`Node status: ${status}, id: ${id.id}`);
+      console.log(`Node status: ${status}, id: ${this.id.id}`);
       this.me = id.id;
       console.log(this.me);
       console.log(node.swarm.peers());
@@ -225,5 +219,5 @@ export default {
     setInterval(this.checkAlive, 60000);
   },
   mounted() {},
-};
+}
 </script>
