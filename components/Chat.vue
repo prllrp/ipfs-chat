@@ -11,10 +11,10 @@
             <div class="chat-body-messages">
                 <div v-for="message in messages" v-bind:key="message.messageId"  class="chat-body-message">
                  <div class="chat-body-id">
-                        {{ message.from }}
+                        {{ message.from.id }}
                     </div>
                     <div class="chat-body-message-text">
-                        {{ message.text }}
+                        {{ message.message }}
                     </div>
                    
                     <div class="chat-body-message-time">

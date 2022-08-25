@@ -1,6 +1,6 @@
 <template>
   <div class="main">
-    <Login @login = "loginFunction" />
+    <!-- <Login @login = "loginFunction" @signup = 'signUpFunction'/> -->
     <Chat
       :messages="messages"
       @send-message="sendMessage"
@@ -12,9 +12,7 @@
 <script>
 import Chat from "~/components/Chat.vue";
 import Login from "../components/Login.vue";
-import { CID } from 'multiformats/cid';
-import * as json from 'multiformats/codecs/json'
-import { sha256 } from 'multiformats/hashes/sha2'
+
 
 export default {
   name: "IndexPage",
@@ -43,36 +41,58 @@ export default {
     };
   },
   methods: {
-    async signUpFunction(data){
-      this.username = data.username;
-      
-  },
-    async loginFunction(data){
-          
-    },
     async setChannel(channel) {
       this.channel = channel;
       console.log("Channel set to " + channel);
-      await this.node.pubsub.subscribe(this.channel, (data) => {
-        let message = JSON.parse(new TextDecoder().decode(data.data));
-        this.messages.push(message);
-        console.log(this.messages);
-        this.title = channel;
-      });
+      await this.node.pubsub.subscribe(this.channel, this.recieveMessage);
       this.channelJoined = true;
     },
+    async recieveMessage(msg){
+      const data = JSON.parse(new TextDecoder().decode(msg.data));
+      if(this.verifyMessage(data)){
+        this.messages.push(data);
+      }else{
+        return
+      }
+    },
     async sendMessage(message) {
+      const msg = await this.signMessage(message);
       await this.node.pubsub.publish(
         this.channel,
-        new TextEncoder().encode(
-          JSON.stringify({
-            text: message,
-            time: new Date().toLocaleTimeString(),
-            from: this.id,
-            messageId: Math.floor(Math.random() * 1000000),
-          })
-        )
+        new TextEncoder().encode(JSON.stringify(msg))
       );
+    },
+    async  verifyMessage(data) {
+      console.log(data)
+      const signerAddress = await ethers.utils.verifyMessage(
+        data.message,
+        data.signature
+      );
+      if(signerAddress == data.address){
+        return true;
+      }else{
+        return false;
+      }
+    },
+    async signMessage(message){
+      if(!window.ethereum) {
+        alert("Please enable metamask");
+        return;
+      }
+      await window.ethereum.send("eth_requestAccounts");
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const signature =   await signer.signMessage(message);
+      const address = await signer.getAddress();
+      const signedMessage = {
+        message: message,
+        signature: signature,
+        address: address,
+        time: new Date().toLocaleTimeString(),
+        messageId: Math.floor(Math.random() * 1000000),
+        from: this.id
+      }
+      return signedMessage
     },
     async createNode() {
       //create a node to be passed into the chat component
@@ -102,7 +122,7 @@ export default {
       this.node = node;
       const status = node.isOnline() ? "online" : "offline";
       console.log(`Node status: ${status}, id: ${this.id.id}`);
-      this.me = id.id;
+      this.me = this.id.id;
       console.log(this.me);
       console.log(node.swarm.peers());
 
@@ -114,6 +134,7 @@ export default {
           "announce-circuit",
           new TextEncoder().encode("peer-alive")
         );
+        setTimeout(function(){}, 1000)
       }
 
       setInterval(function () {
@@ -132,6 +153,8 @@ export default {
         );
       }, 2000);
 
+      
+
       return node;
     },
     async publishMessages(message) {
@@ -142,14 +165,16 @@ export default {
     async processAnnounce(announce) {
       // process the recieved address
       const addr = new TextDecoder().decode(announce.data);
+      
+
+      if (announce.from == this.me.string) {
+        
+        return;
+      }
+
       console.log(
         "Announce reeceived " + addr + "from " + announce.from.toString()
       );
-
-      if (announce.from == this.me.string) {
-        console.log("Ignoring self announcement");
-        return;
-      }
 
       if (addr == "peer-alive") {
         console.log(addr);
@@ -217,6 +242,7 @@ export default {
     console.log(node);
     this.setChannel("global");
     setInterval(this.checkAlive, 60000);
+    
   },
   mounted() {},
 }

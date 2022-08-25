@@ -11,7 +11,7 @@ export default {
     script:[
     {hid: 'Ipfs', src: 'https://cdn.jsdelivr.net/npm/ipfs/dist/index.min.js', defer: true},
     {hid: 'Libcrypto', src: 'https://cdn.jsdelivr.net/npm/libp2p-crypto@0.21.2/dist/index.min.js', defer: true},
-    {hid: 'multiformats', src: 'https://cdn.jsdelivr.net/npm/multiformats@9.5.2/esm/src/index.js', defer: true, type: 'module'},
+    {hid: 'ethers', src: 'https://cdn.jsdelivr.net/npm/ethers@5.7.0/dist/ethers.umd.min.js', defer: true},
   ],
     htmlAttrs: {
       lang: 'en'

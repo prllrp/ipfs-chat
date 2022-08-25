@@ -42,8 +42,8 @@ export default {
         },
         signUp(){
             this.$emit('signup', {
-                username: this.username,
-                password: this.password,
+                username: username.value,
+                password: password.value,
             });
         }
     },
