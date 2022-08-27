@@ -1,6 +1,6 @@
 <template>
   <div class="main">
-    <!-- <Login @login = "loginFunction" @signup = 'signUpFunction'/> -->
+    <Rooms :rooms = "rooms" @createRoom = "createRoom" />
     <Chat
       :messages="messages"
       @send-message="sendMessage"
@@ -11,12 +11,12 @@
 
 <script>
 import Chat from "~/components/Chat.vue";
-import Login from "../components/Login.vue";
+import Rooms from "~/components/Rooms.vue";
 
 
 export default {
   name: "IndexPage",
-  components: { Chat, Login },
+  components: { Chat, Rooms },
   head() {
     return {
       
@@ -30,7 +30,11 @@ export default {
       peers: [],
       peer: null,
       peerCount: 0,
-      channel: null,
+      channel: {
+        id: null,
+        name: '',
+        description: ''
+      },
       lastAlive: 0,
       lastPeer: 0,
       bootstraps: [],
@@ -38,14 +42,33 @@ export default {
       id: null,
       channelJoined: false,
       chatPeers: [],
+      rooms: [],
+      channel: {
+        id: null,
+        name: '',
+        description: ''
+      },
+      defaultChannel:{
+        id: 12345,
+        name: 'general',
+        description: 'default room',
+      },
     };
   },
   methods: {
+    async createRoom(data){
+      data.id =Math.floor(Math.random() * 10000)
+      this.channel = data;
+      await this.setChannel(data);
+    },
     async setChannel(channel) {
+      this.messages = [];
       this.channel = channel;
-      console.log("Channel set to " + channel);
-      await this.node.pubsub.subscribe(this.channel, this.recieveMessage);
+      console.log("Channel set to " + channel.name);
+      await this.node.pubsub.subscribe(channel.name, this.recieveMessage);
       this.channelJoined = true;
+      
+      
     },
     async recieveMessage(msg){
       const data = JSON.parse(new TextDecoder().decode(msg.data));
@@ -58,7 +81,7 @@ export default {
     async sendMessage(message) {
       const msg = await this.signMessage(message);
       await this.node.pubsub.publish(
-        this.channel,
+        this.channel.name,
         new TextEncoder().encode(JSON.stringify(msg))
       );
     },
@@ -126,6 +149,8 @@ export default {
       console.log(this.me);
       console.log(node.swarm.peers());
 
+      //subscribe and publish to announce circuit
+
       await node.pubsub.subscribe("announce-circuit", this.processAnnounce);
       console.log("subscribed to announce-circuit");
 
@@ -154,13 +179,31 @@ export default {
       }, 2000);
 
       
+      await this.setChannel(this.defaultChannel);
+      this.channel = this.defaultChannel;
+      this.rooms.push(this.defaultChannel)
+      
 
+      //listen for new rooms and announce our current room
+      await this.node.pubsub.publish('ipfschat.rooms', new TextEncoder().encode(JSON.stringify(this.channel)))
+      await node.pubsub.subscribe('ipfschat.rooms', this.processRooms);
       return node;
+    },
+    async processRooms(msg){
+      console.log(msg)
+      const data = JSON.parse(new TextDecoder().decode(msg.data));
+      for(let i = 0; i < this.rooms.length; i++){
+        if(this.rooms[i].id == data.id){
+          return
+        }
+      }
+      await this.node.pubsub.publish('ipfschat.rooms', new TextEncoder().encode(JSON.stringify(this.channel)))
+      this.rooms.push(data);
     },
     async publishMessages(message) {
       //publish messages to the channel
       this.messages.push(message);
-      this.node.pubsub.publish(this.channel, new TextEncoder().encode(message));
+      this.node.pubsub.publish(this.channel.name, new TextEncoder().encode(message));
     },
     async processAnnounce(announce) {
       // process the recieved address
@@ -172,9 +215,7 @@ export default {
         return;
       }
 
-      console.log(
-        "Announce reeceived " + addr + "from " + announce.from.toString()
-      );
+     
 
       if (addr == "peer-alive") {
         console.log(addr);
@@ -238,12 +279,19 @@ export default {
   },
 
   async created() {
+    
     const node = await this.createNode();
+    this.node = node;
     console.log(node);
-    this.setChannel("global");
+    
+    
+    
     setInterval(this.checkAlive, 60000);
     
+    
   },
-  mounted() {},
+  mounted() {
+    
+  },
 }
 </script>
