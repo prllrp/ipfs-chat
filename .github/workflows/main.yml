@@ -24,13 +24,10 @@ jobs:
       - run: npm i
 
       - run: npm run generate
-  publish:
-    runs-on:  ubuntu-latest
-    steps:
-    - uses: aquiladev/ipfs-action@master
-      with:
-        name: ipfs-publish
-        path: ./dist
-        service: infura
-        infuraProjectId: ${{ secrets.INFURA_PROJECT_ID }}
-        infuraProjectSecret: ${{ secrets.INFURA_PROJECT_SECRET }}
+      - uses: aquiladev/ipfs-action@master
+      - name: ipfs-publish
+        with:
+          path: ./dist
+          service: infura
+          infuraProjectId: ${{ secrets.INFURA_PROJECT_ID }}
+          infuraProjectSecret: ${{ secrets.INFURA_PROJECT_SECRET }}
