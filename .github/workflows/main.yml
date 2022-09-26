@@ -20,13 +20,13 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run build
+      - run: npm run generate
   publish:
     runs-on:  ubuntu-latest
     steps:
     - uses: aquiladev/ipfs-action@master
       with:
-        path: ./build
+        path: ./dist
         service: infura
         infuraProjectId: ${{ secrets.INFURA_PROJECT_ID }}
         infuraProjectSecret: ${{ secrets.INFURA_PROJECT_SECRET }}
