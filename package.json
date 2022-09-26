@@ -9,7 +9,7 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
-    "core-js": "^3.19.3",
+    "core-js": "^3.25.3",
     "ipfs": "^0.14.3",
     "ipfs-core": "^0.15.4",
     "libp2p": "^0.37.3",
