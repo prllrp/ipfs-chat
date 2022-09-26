@@ -25,7 +25,6 @@ jobs:
 
       - run: npm run generate
       - uses: aquiladev/ipfs-action@master
-      - name: ipfs-publish
         with:
           path: ./dist
           service: infura
