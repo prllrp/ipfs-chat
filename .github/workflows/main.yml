@@ -2,10 +2,13 @@
 
 name: CI
 
+
+
 on:
   push:
     branches:
     - master
+  workflow_dispatch:
     
 
 jobs:
@@ -26,6 +29,7 @@ jobs:
     steps:
     - uses: aquiladev/ipfs-action@master
       with:
+        name: ipfs-publish
         path: ./dist
         service: infura
         infuraProjectId: ${{ secrets.INFURA_PROJECT_ID }}
