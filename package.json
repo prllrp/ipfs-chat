@@ -14,7 +14,7 @@
     "ipfs-core": "^0.15.4",
     "libp2p": "^0.37.3",
     "nuxt": "^2.12.2",
-    "vue": "^2.6.14",
+    "vue": "^3.2.44",
     "vue-server-renderer": "^2.6.14",
     "vue-template-compiler": "^2.6.14",
     "webpack": "^4.46.0"
